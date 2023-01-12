@@ -1,0 +1,6 @@
+# PyPi
+dist/
+*.egg-info/
+
+# Python
+__pycache__/

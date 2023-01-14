@@ -1,0 +1,2 @@
+# Hypixel Nick Tracker and ip-python
+requests==2.28.1

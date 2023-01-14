@@ -48,7 +48,7 @@ You are expected to respect these limits, and if you do not, you will be blocked
 To use any implementation code block, you must create a declaration to a new API client.
 
 ```python
-from cactive_hypixel_nick_tracker import Client
+from cactive.hypixel_nick_tracker import Client
 client = Client(
     key="MY_API_KEY", # replace this field.
     cache=False

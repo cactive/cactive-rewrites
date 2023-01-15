@@ -1,0 +1,10 @@
+# NPM/Yarn
+node_modules/
+
+# Typescript
+dist/
+
+# Build
+cactive-bin-linux
+cactive-bin-macos
+cactive-bin-win.exe

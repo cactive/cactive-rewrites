@@ -5,7 +5,8 @@
   "main": "./src/index.ts",
   "bin": "./dist/index.js",
   "scripts": {
-    "build": "tsc && pkg -C GZip --ouput cactive-bin ."
+    "build": "tsc && pkg -C GZip --out-path cactive-bin/ .",
+    "build-nodeploy": "tsc"
   },
   "pkg": {
     "assets": [
@@ -27,6 +28,7 @@
   },
   "dependencies": {
     "phin": "^3.7.0",
+    "readline": "^1.3.0",
     "ts-command-line-args": "^2.3.1"
   }
 }

@@ -1,12 +1,12 @@
 import { parse } from "ts-command-line-args";
+import { readFileSync, existsSync } from "fs";
+import { createInterface } from "readline";
 
 import Arguments from "./types/arguments";
+import Cactive from "./types/cactive";
+import Input from "./types/input";
 
 import { self, retrieve } from "./ip";
-
-function test(a: string, b: string) {
-    console.log(a, b)
-}
 
 const year = new Date().getFullYear();
 const valid_modules: string[] = [
@@ -26,36 +26,68 @@ const modules_functions_mapping: {[k: string]: {[k: string]: (...args: any[]) =>
 };
 const args = parse<Arguments>(
     {
-        module: { type: String, alias: "m", description: "The Cactive module to use (ip, etc.)" },
-        func: { type: String, alias: "f", description: "The function to use from that module (retrieve, etc.)" },
-        args: { type: String, optional: true, alias: "a", description: "The args to pass to that function seperated by ',' ('8.8.8.8, hi')" },
+        file: { type: String, alias: "f", defaultValue: "cactive.json", description: "The file location of you cactive.json file" },
         help: { type: Boolean, optional: true, alias: "h", description: "Prints the usage guide" },
     },
     {
         helpArg: "help",
         headerContentSections: [{ header: "Cactive Bin Config", content: "By using Cactive Bin, you agree to our CactiveNetwork Licence Version 1.0" }],
-        footerContentSections: [{ header: `Copyright © ${year} Luke Matison, Cactive.`, content: "All Rights Reserved." }],
+        footerContentSections: [{ header: `Copyright © ${year} Cactive.`, content: "All Rights Reserved." }],
     },
 );
 
 if (!args.help) {
-    if (!valid_modules.includes(args.module)) throw Error("That is not a valid module!");
-    if (!valid_functions[args.module].includes(args.func)) throw Error("That is not a valid function for that module!");
+    if (!existsSync(args.file)) throw Error("Your file has to exist!");
 
-    // Load Module's Function With Args
-    let pass_args: string[];
-    if (args.args) {
-        pass_args = args.args.replace(/\[|\]/g, "").split(",");
-    } else {
-        pass_args = [];
+    const rl = createInterface({
+        input: process.stdin,
+        output: process.stdout,
+    });
+    const question = (questionText: string) => new Promise<string>(resolve => rl.question(questionText, resolve));
+
+    let cactiveFile: Cactive;
+
+    try {
+        cactiveFile = JSON.parse(readFileSync(args.file, 'utf-8'));
+    } catch (e) {
+        throw Error("Your file has to be JSON parsable!");
     }
 
-    const arg_length = modules_functions_mapping[args.module][args.func].length;
-    if (pass_args.length < arg_length || pass_args.length > arg_length) throw Error("User passed too little or too many arguments for that function");
+    (async() => {
+        while (true) {
+            let input: Input;
+            try {
+                input = JSON.parse(await question(">>> "));
+            } catch (e) {
+                throw Error("Input must be JSON parsable!");
+            }
 
-    (async () => {
-        await modules_functions_mapping[args.module][args.func](...pass_args);
-    })().catch(e => {
-        console.log(e);
-    });
+            if (!cactiveFile[input.command]) throw Error(`Command ${input.command} was not found in your cactive.json!`);
+
+            const command = cactiveFile[input.command];
+            let args: any[];
+            let module = command.module;
+
+            if (!valid_modules.includes(module)) throw Error(`Module ${module} is not a valid module!`);
+            if (!valid_functions[module].includes(command.func)) throw Error(`Function ${command.func} is not a valid function for module ${command.module}!`);
+
+            if (command.args === "user") {
+                if (!input.args) throw Error("Arguments are required on a user args command!");
+
+                args = Object.values(input.args);
+            } else {
+                args = Object.values(command.args);
+            }
+
+            const func = modules_functions_mapping[command.module][command.func];
+
+            if (args.length < func.length || args.length > func.length) throw Error("You passed too little or too many arguments for that function!");
+
+            try {
+                await func(...args);
+            } catch (e) {
+                console.log(e);
+            }
+        }
+    })();
 }

@@ -1,6 +1,4 @@
 export default interface Arguments {
-    module: string
-    func: string
-    args?: string
+    file: string
     help?: boolean
 }

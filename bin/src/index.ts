@@ -45,12 +45,13 @@ if (!args.help) {
     // Load Module's Function With Args
     let pass_args: string[];
     if (args.args) {
-        pass_args = args.args.replace(" ", "").split(",");
+        pass_args = args.args.replace(/\[|\]/g, "").split(",");
     } else {
         pass_args = [];
     }
 
-    if (pass_args.length < modules_functions_mapping[args.module][args.func].length) throw Error("User passed too little arguments for that function");
+    const arg_length = modules_functions_mapping[args.module][args.func].length;
+    if (pass_args.length < arg_length || pass_args.length > arg_length) throw Error("User passed too little or too many arguments for that function");
 
     (async () => {
         await modules_functions_mapping[args.module][args.func](...pass_args);

@@ -5,11 +5,10 @@
   "main": "./src/index.ts",
   "bin": "./dist/index.js",
   "scripts": {
-    "build": "tsc && pkg --ouput bin/cactive-bin ."
+    "build": "tsc && pkg -C GZip --ouput cactive-bin ."
   },
   "pkg": {
     "assets": [
-      "node_modules/**/*",
       "dist/**/*"
     ],
     "targets": [

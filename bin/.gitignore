@@ -5,6 +5,8 @@ node_modules/
 dist/
 
 # Build
+bin/
+bin.zip
 cactive-bin-linux
 cactive-bin-macos
 cactive-bin-win.exe

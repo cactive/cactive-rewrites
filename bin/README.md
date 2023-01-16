@@ -51,3 +51,33 @@ The data after ">>> " is just stringified JSON that matches this style:
     "args?": "args to pass to the function defined in cactive.json"
 }
 ```
+
+### Example Python Script
+Here is our cactive.json:
+```json
+{
+  "retrieve": {
+    "module": "ip",
+    "func": "retrieve",
+    "args": "user"
+  },
+  "google": {
+    "module": "ip",
+    "func": "retrieve",
+    "args": {
+      "ip": "8.8.8.8"
+    }
+  }
+}
+```
+Here is our python file:
+```python
+from subprocess import Popen, PIPE
+
+location = "./cactive-bin/cactive-bin-win.exe"
+
+p = Popen([location, "-f", "cactive.json"], stdin=PIPE, stdout=PIPE, stderr=PIPE, encoding="UTF8")
+p.stdin.write("{\"command\":\"google\"}\n")
+p.stdin.flush()
+print(p.stdout.readline()[4:])
+```
